@@ -19,57 +19,31 @@ The module adds the following new types:
 
 ### Parameters
 
-- **activationkeys**
-    The activation key to use when registering the system (cannot be used
-    with username and password)
+- **activationkeys**: The activation key to use when registering the system (cannot be used with username and password)
+- **ensure**: Valid values are `present`, `absent`. Default value is `present`.
+- **force**: Should the registration be forced. Use this option with caution, setting it true will cause the rhnreg_ks command to be run every time runs. Default value `false`.
+- **hardware**: Whether or not the hardware information should be probed. Default value is `true`.
+- **packages**: Whether or not packages information should be probed. Default value is `true`.
+- **password**: The password to use when registering the system
+- **profile_name**: The name the system should use in RHN or Satellite
+- **proxy**: If needed, specify the HTTP Proxy
+- **proxy_password**: Specify a password to use with an authenticated http proxy
+- **proxy_user**: Specify a username to use with an authenticated http proxy
+- **rhnsd**: Whether or not rhnsd should be started after registering. Default value is `true`.
+- **server_url**: Specify a url to use as a server
+- **ssl_ca_cert**: Specify a file to use as the ssl CA cert
+- **username**: The username to use when registering the system
+- **virtinfo**: Whether or not virtualiztion information should be uploaded. Default value is `true`.
 
-- **ensure**
-      Valid values are `present`, `absent`.
+### Example
 
-- **force**
-    Should the registration be forced. Use this option with caution,
-    setting it true will cause the rhnreg_ks command to be run every time
-    runs.
-
-- **hardware**
-    Whether or not the hardware information should be probed
-
-- **name**
-    The Server name.
-
-- **packages**
-    Whether or not packages information should be probed
-
-- **password**
-    The password to use when registering the system
-
-- **profile_name**
-    The name the system should use in RHN or Satellite
-
-- **proxy**
-    If needed, specify the HTTP Proxy
-
-- **proxy_password**
-    Specify a password to use with an authenticated http proxy
-
-- **proxy_user**
-    Specify a username to use with an authenticated http proxy
-
-- **rhnsd**
-    Whether or not rhnsd should be started after registering
-
-- **server_url**
-    Specify a url to use as a server
-
-- **ssl_ca_cert**
-    Specify a file to use as the ssl CA cert
-
-- **username**
-    The username to use when registering the system
-
-- **virtinfo**
-    Whether or not virtualiztion information should be uploaded
-
+<pre>
+rhn_register { 'server.example.com':
+  ensure         => present,
+  activationkeys => '1-rhel-x86_64-6.3',
+  force          => true,
+}
+</pre>
 
 ## Installing
 
