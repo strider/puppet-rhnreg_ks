@@ -24,7 +24,7 @@
 #
 # === Authors
 #
-# Gaël Chamoulaud <gchamoul@redhat.com> 
+# Gaël Chamoulaud <gchamoul@redhat.com>
 #
 # === Copyright
 #
