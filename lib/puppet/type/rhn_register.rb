@@ -51,15 +51,8 @@ Puppet::Type.newtype(:rhn_register) do
 
   end
 
-  newparam(:activationkeys, :array_matching => :all) do
+  newparam(:activationkeys) do
     desc "The activation key to use when registering the system (cannot be used with username and password)"
-
-    validate do |value|
-      unless value.is_a?(Array) or value.is_a?(String)
-        raise ArgumentError,  "Activation Keys field must be a String or an Array"
-      end
-
-    end
 
   end
 

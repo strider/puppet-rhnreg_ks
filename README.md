@@ -5,6 +5,8 @@ Registering. It works with `RHN` or a `Red Hat Network Satellite` Server.
 
 ## License
 
+Read Licence file for more information.
+
 ## Requirements
 * puppet-boolean [on GitHub](https://github.com/adrienthebo/puppet-boolean)
 
@@ -37,13 +39,29 @@ The module adds the following new types:
 
 ### Example
 
+Registering Clients to Red Hat Network RHN Satellite Server:
+
 <pre>
 rhn_register { 'server.example.com':
-  ensure         => present,
-  activationkeys => '1-rhel-x86_64-6.3',
+  activationkeys => '1-myactivationkey',
+  server_url     => 'https://satellite.example.com/XMLRPC',
+  ssl_ca_cert    => '/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT',
+}
+</pre>
+
+Register a `Red Hat Enterprise Linux` with RHN Server: 
+
+<pre>
+rhn_register { 'server.example.com':
+  activationkeys => '888888888eeeeeee888888eeeeee8888',
+  username       => 'myusername',
+  password       => 'mypassword',
+  server_url     => 'https://xmlrpc.rhn.redhat.com/XMLRPC',
+  ssl_ca_cert    => '/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT',
   force          => true,
 }
 </pre>
+
 
 ## Installing
 
