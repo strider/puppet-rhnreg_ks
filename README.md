@@ -49,7 +49,7 @@ rhn_register { 'server.example.com':
 }
 </pre>
 
-Register a `Red Hat Enterprise Linux` with RHN Server: 
+Registering Clients to RHN Server:
 
 <pre>
 rhn_register { 'server.example.com':
