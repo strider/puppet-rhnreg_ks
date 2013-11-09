@@ -53,12 +53,18 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   end
 
   def exists?
+    if @resource[:force] == true
+      Puppet.debug("Force registration is enabled")
+      return false
+    end
     Puppet.debug("Verifying if the server is already registered")
     if File.exists?("/etc/sysconfig/rhn/systemid")
-      if @resource[:force] == true
-        register
+      if system("rhn-channel -b")
+        return true
+      else
+        File.delete("/etc/sysconfig/rhn/systemid")
+        return false
       end
-      return true
     else
       return false
     end
