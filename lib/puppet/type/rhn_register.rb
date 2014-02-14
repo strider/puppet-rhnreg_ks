@@ -43,7 +43,7 @@ Puppet::Type.newtype(:rhn_register) do
 
   newparam(:username) do
     desc "The username to use when registering the system"
-
+    
   end
 
   newparam(:password) do
