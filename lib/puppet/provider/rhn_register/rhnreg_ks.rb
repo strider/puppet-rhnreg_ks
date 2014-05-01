@@ -59,8 +59,7 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     begin
       unregister @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
     rescue Exception => e
-      puts "The server #{@resource[:server_url]} could not be contacted"
-      exit 1
+      self.fail("The server #{@resource[:server_url]} could not be contacted")
     end
     FileUtils.rm_f("/etc/sysconfig/rhn/systemid")
   end
