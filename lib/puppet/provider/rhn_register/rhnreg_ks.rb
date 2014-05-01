@@ -7,7 +7,9 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
 
   confine :osfamily => :redhat
 
-  commands :rhnreg_ks => "rhnreg_ks"
+  commands :rhnreg_ks     => "rhnreg_ks"
+  commands :unregister    => "/usr/local/bin/unregister"
+  commands :checksat      => "/usr/local/bin/checksat"
 
   def build_parameters
     params = []
@@ -42,27 +44,47 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     cmd = build_parameters
     rhnreg_ks(*cmd)
   end
+  
+  def checkserver
+    Puppet.debug("Checking if the server is in #{@resource[:server_url]}")
+    checksat @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
+  end
 
   def create
     register
   end
 
   def destroy
-    Puppet.debug("This server will be locally unregistered")
+    Puppet.debug("This server will be locally and remotely unregistered")
+    begin
+      unregister @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
+    rescue Exception => e
+      puts "The server #{@resource[:server_url]} could not be contacted"
+      exit 1
+    end
     FileUtils.rm_f("/etc/sysconfig/rhn/systemid")
   end
 
   def exists?
     Puppet.debug("Verifying if the server is already registered")
-    if File.exists?("/etc/sysconfig/rhn/systemid")
-      if @resource[:force] == true
-        register
+      if File.exists?("/etc/sysconfig/rhn/systemid") && File.open("/etc/sysconfig/rhn/systemid").grep(/#{@resource[:name]}/).any? 
+       begin
+         checkserver
+       rescue Exception => e
+        Puppet.debug("Failed to get servername from Server")
+        if @resource[:force] == true
+         destroy
+         register
+        else
+         destroy
+         register
+        end
+       end
+        return true
+      else
+        destroy
+        return false
       end
-      return true
-    else
-      return false
     end
+
   end
-
-end
-
