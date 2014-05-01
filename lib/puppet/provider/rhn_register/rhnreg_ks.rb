@@ -70,14 +70,14 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
        begin
          checkserver
        rescue Exception => e
-        Puppet.debug("Failed to get servername from #{@resource[:server_url]}")
-        if @resource[:force] == true
-         destroy
-         register
-        else
-         destroy
-         register
-        end
+          Puppet.debug("Failed to get servername from #{@resource[:server_url]}")
+            if @resource[:force] == true
+               destroy
+	       return false
+            else
+               destroy
+	       return false
+            end
        end
         return true
       else
