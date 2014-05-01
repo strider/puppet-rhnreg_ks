@@ -22,7 +22,7 @@ require 'openssl'
 serverList = @client.call('system.listSystems', @key)
 serverList.each do |x|
   if x['name'] == "#{@MYSYSTEM}"
-        return true
+	exit 0
   else
         next
   end
