@@ -14,7 +14,7 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   def build_parameters
     params = []
 
-    if @resource[:username].nil? and @resource[:activationkeys].nil?
+    if @resource[:username].nil? and @resource[:activationkeys].nil? and @resource[:password].nil?
         self.fail("Either an activation key or username/password is required to register")
     end
 
