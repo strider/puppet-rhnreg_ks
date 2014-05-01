@@ -1,0 +1,11 @@
+language: ruby
+before_install:
+  - gem install rake
+  - gem install puppetlabs_spec_helper
+  - gem install rspec
+  - gem install puppet-lint
+
+notifications:
+  email: false
+rvm:
+  - 2.1.1 
