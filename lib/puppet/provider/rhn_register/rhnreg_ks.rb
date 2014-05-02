@@ -7,7 +7,9 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
 
   confine :osfamily => :redhat
 
-  commands :rhnreg_ks => "rhnreg_ks"
+  commands :rhnreg_ks     => "rhnreg_ks"
+  commands :unregister    => "/usr/local/bin/unregister"
+  commands :checksat      => "/usr/local/bin/checksat"
 
   def build_parameters
     params = []
@@ -43,26 +45,90 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     rhnreg_ks(*cmd)
   end
 
-  def create
-    register
-  end
-
-  def destroy
-    Puppet.debug("This server will be locally unregistered")
-    FileUtils.rm_f("/etc/sysconfig/rhn/systemid")
-  end
-
-  def exists?
-    Puppet.debug("Verifying if the server is already registered")
-    if File.exists?("/etc/sysconfig/rhn/systemid")
-      if @resource[:force] == true
-        register
-      end
-      return true
-    else
-      return false
+  def check_server_name
+    Puppet.debug("Checking if the server #{@resource[:name]} is in #{@resource[:server_url]}")
+    begin
+        checksat @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
+    rescue Exception => csn
+        self.fail("The server #{@resource[:server_url]} could not be contacted")
     end
   end
 
-end
 
+  def check_profile_name
+    Puppet.debug("Checking if the server #{@resource[:profile_name]} is in #{@resource[:server_url]}")
+    begin
+        checksat @resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url]
+    rescue Exception => cpn
+        self.fail("The server #{@resource[:server_url]} could not be contacted")
+    end
+  end
+  
+  def checkserver
+      if ! @resource[:profile_name].nil?
+        check_profile_name
+      else
+        check_server_name
+      end
+  end
+
+  def create
+    register
+  end
+  
+  def destroy_profile_name
+      begin
+            unregister @resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url]
+      rescue Exception => dpn
+            self.fail("The server #{@resource[:server_url]} could not be contacted")
+      end
+            FileUtils.rm_f("#{@SFILE}")
+  end
+
+
+  def destroy_server_name
+      begin
+            unregister @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
+      rescue Exception => dsn
+            self.fail("The server #{@resource[:server_url]} could not be contacted")
+      end
+            FileUtils.rm_f("#{@SFILE}")
+  end
+
+
+  def destroy
+      Puppet.debug("This server will be locally and remotely unregistered")
+
+      if ! @resource[:profile_name].nil?
+             destroy_profile_name
+      else
+             destroy_server_name 
+      end
+  end
+
+
+
+  def exists?
+    @SFILE = '/etc/sysconfig/rhn/systemid'
+
+    Puppet.debug("Verifying if the server is already registered")
+      if File.exists?("#{@SFILE}") and File.open("#{@SFILE}").grep(/#{@resource[:name]}/).any? and File.open("#{@SFILE}").grep(/#{@resource[:profile_name]}/).any?
+       begin
+           checkserver
+       rescue Exception => e
+           Puppet.debug("Failed to get servername from @resource[:server_url]")
+            if @resource[:force] == true
+               destroy
+               return false
+            else
+               destroy
+               return false
+            end
+       end
+          return true
+      else
+          destroy
+          return false
+      end
+  end
+end

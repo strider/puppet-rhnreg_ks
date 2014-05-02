@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+require 'xmlrpc/client'
+require 'net/https'
+require 'openssl'
+
+#The following variables can take variables for puppet
+
+@MYSYSTEM = ARGV[0].to_s
+@SATELLITE_LOGIN =  ARGV[1].to_s
+@SATELLITE_PASSWORD = ARGV[2].to_s
+@SATELLITE_URL = URI(ARGV[3].to_s)
+@SATELLITE_URL.path = '/rpc/api'
+@use_ssl = true
+@mytimeout = 30
+
+@client = XMLRPC::Client.new2("#{@SATELLITE_URL}") 
+
+#disable check of ssl cert
+@client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+@key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+serverList = @client.call('system.listSystems', @key)
+serverList.each do |x|
+  if x['name'] == "#{@MYSYSTEM}"
+	exit 0
+  else
+        next
+  end
+end
+raise Exception, "Server #{@MYSYSTEM} not found"
