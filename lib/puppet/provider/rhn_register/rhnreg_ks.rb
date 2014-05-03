@@ -1,3 +1,8 @@
+require 'xmlrpc/client'
+require 'net/https'
+require 'openssl'
+
+
 Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   @doc = <<-EOS
     This provider registers a machine with RHN or a Satellite Server.
@@ -8,13 +13,11 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   confine :osfamily => :redhat
 
   commands :rhnreg_ks     => "rhnreg_ks"
-  commands :unregister    => "/usr/local/bin/unregister"
-  commands :checksat      => "/usr/local/bin/checksat"
 
   def build_parameters
     params = []
 
-    if @resource[:username].nil? and @resource[:activationkeys].nil? and @resource[:password].nil?
+    if @resource[:username].nil? and @resource[:activationkeys].nil?
         self.fail("Either an activation key or username/password is required to register")
     end
 
@@ -44,46 +47,114 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     cmd = build_parameters
     rhnreg_ks(*cmd)
   end
-  
-  def checkserver
-    Puppet.debug("Checking if the server is in #{@resource[:server_url]}")
-    checksat @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
-  end
 
   def create
     register
   end
 
+  def checkserver(mysystem, mylogin, mypassword, myurl)
+
+    Puppet.debug("I am checking the server for #{mysystem}")
+
+    @MYSYSTEM = mysystem.to_s
+    @SATELLITE_LOGIN = mylogin.to_s
+    @SATELLITE_PASSWORD = mypassword.to_s
+    @SATELLITE_URL = URI(myurl.to_s)
+    @SATELLITE_URL.path = '/rpc/api'
+    @use_ssl = true
+    @mytimeout = 30
+
+    @client = XMLRPC::Client.new2("#{@SATELLITE_URL}") 
+
+    #disable check of ssl cert
+    @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+    serverList = @client.call('system.listSystems', @key)
+        serverList.each do |x|
+          if x['name'] == "#{@MYSYSTEM}"
+	        return true
+          else
+                next
+          end
+        end
+    raise Exception, "Server #{@MYSYSTEM} not found"
+    
+
+  end
+
+  def destroy_server_name(mysystem, mylogin, mypassword, myurl)
+
+      Puppet.debug("Destroying server #{mysystem} from #{myurl}")
+
+      @MYSYSTEM = mysystem.to_s
+      @SATELLITE_LOGIN = mylogin.to_s
+      @SATELLITE_PASSWORD = mypassword.to_s
+      @SATELLITE_URL = URI(myurl.to_s)
+      @SATELLITE_URL.path = '/rpc/api'
+      @use_ssl = true
+      @mytimeout = 30
+      
+        def delete_server(myserver, myserverid)
+
+                puts "This script has deleted server #{myserver} with id: #{myserverid} from #{@SATELLITE_URL.host}"
+                return_code = @client.call('system.deleteSystems', @key, myserverid)
+        end
+
+       @client = XMLRPC::Client.new2("#{@SATELLITE_URL}")
+
+       #disable check of ssl cert
+       @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+       @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+         serverList = @client.call('system.listSystems', @key)
+           serverList.each do |x|
+             if x['name'] == "#{@MYSYSTEM}"
+               delete_server(x['name'], x['id'])
+             else
+               next
+             end
+           end
+       FileUtils.rm_f("#{@SFILE}")
+  end
+
+
   def destroy
-    Puppet.debug("This server will be locally and remotely unregistered")
-    begin
-      unregister @resource[:name], @resource[:username], @resource[:password], @resource[:server_url]
-    rescue Exception => e
-      self.fail("The server #{@resource[:server_url]} could not be contacted")
-    end
-    FileUtils.rm_f("/etc/sysconfig/rhn/systemid")
+      Puppet.debug("This server will be locally and remotely unregistered")
+
+      if ! @resource[:profile_name].nil?
+             destroy_server_name(@resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url])
+      else
+             destroy_server_name(@resource[:name], @resource[:username], @resource[:password], @resource[:server_url])
+      end
   end
 
   def exists?
-    Puppet.debug("Verifying if the server is already registered")
-      if File.exists?("/etc/sysconfig/rhn/systemid") && File.open("/etc/sysconfig/rhn/systemid").grep(/#{@resource[:name]}/).any? 
-       begin
-         checkserver
-       rescue Exception => e
-          Puppet.debug("Failed to get servername from #{@resource[:server_url]}")
-            if @resource[:force] == true
-               destroy
-	       return false
-            else
-               destroy
-	       return false
-            end
-       end
-        return true
-      else
-        destroy
-        return false
-      end
-    end
+    @SFILE = '/etc/sysconfig/rhn/systemid'
 
+    Puppet.debug("Verifying if the server is already registered")
+      if File.exists?("#{@SFILE}") and File.open("#{@SFILE}").grep(/#{@resource[:name]}/).any? and File.open("#{@SFILE}").grep(/#{@resource[:profile_name]}/).any?
+       #begin
+           if ! @resource[:profile_name].nil?
+              checkserver(@resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url])
+               if @resource[:force] == true
+                   destroy
+                   return false
+               end
+               return true
+           else
+             checkserver(@resource[:name], @resource[:username], @resource[:password], @resource[:server_url])
+               if @resource[:force] == true
+                   destroy
+                   return false
+               end
+               return true
+            end
+        #end
+      else
+          destroy
+          return false
+      end
   end
+end
+
