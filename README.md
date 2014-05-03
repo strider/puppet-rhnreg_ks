@@ -13,6 +13,9 @@ Read Licence file for more information.
 ## Authors
 * Gaël Chamoulaud (gchamoul at redhat dot com)
 
+## Contributors 
+* Thomas Foster (Thomas dot Foster eighty at gmail dot com)
+
 ## Type and Provider
 
 The module adds the following new types:
@@ -74,6 +77,8 @@ have to use it) and that the master has pluginsync enabled.  Run the agent on
 the puppetmaster to cause the custom types to be synced to its local libdir
 (`puppet master --configprint libdir`) and then restart the puppetmaster so it
 loads them.
+
+Updated to handle Satellite server, RHN and Spacewalk.
 
 ## Issues
 
