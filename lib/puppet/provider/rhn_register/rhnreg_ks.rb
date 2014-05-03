@@ -88,11 +88,11 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
      @SATELLITE_URL = URI(myurl.to_s)
      @SATELLITE_URL.path = '/rpc/api'
 
-        def delete_server(myserver, myserverid)
+       def delete_server(myserver, myserverid)
 
-                Puppet.debug("This script has deleted server #{myserver} with id: #{myserverid} from #{@SATELLITE_URL.host}")
-                return_code = @client.call('system.deleteSystems', @key, myserverid)
-        end
+           Puppet.debug("This script has deleted server #{myserver} with id: #{myserverid} from #{@SATELLITE_URL.host}")
+           return_code = @client.call('system.deleteSystems', @key, myserverid)
+       end
 
        @client = XMLRPC::Client.new2("#{@SATELLITE_URL}")
 
