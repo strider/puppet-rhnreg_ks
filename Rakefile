@@ -1,7 +1,6 @@
 require 'rake'
 require 'rubygems'
-require 'puppetlabs_spec_helper'
-
+#require 'puppetlabs_spec_helper'
 require 'rspec'
 require 'puppet-lint'
 
