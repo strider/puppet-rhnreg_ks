@@ -1,4 +1,5 @@
-source :rubygems
+#source :rubygems
+source 'https://rubygems.org'
 
 gem 'puppet', '>= 2.6.0'
 gem 'facter', '>= 1.6.1'
