@@ -1,7 +1,6 @@
 language: ruby
 before_install:
   - gem install rake
-  - gem install rubygems
   - gem install puppetlabs_spec_helper
   - gem install rspec
   - gem install puppet-lint
