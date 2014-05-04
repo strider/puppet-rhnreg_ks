@@ -47,7 +47,7 @@ Registering Clients to RHN Server with activation keys:
 <pre>
 rhn_register { 'server.example.com':
   activationkeys => '888888888eeeeeee888888eeeeee8888',
-  ensure         => 'present'
+  ensure         => 'present',
   username       => 'myusername',
   password       => 'mypassword',
   server_url     => 'https://xmlrpc.rhn.redhat.com/XMLRPC',
@@ -60,7 +60,7 @@ Un-register Clients RHN Server with activation keys:
 <pre>
 rhn_register { 'server.example.com':
   activationkeys => '888888888eeeeeee888888eeeeee8888',
-  ensure         => 'absent'
+  ensure         => 'absent',
   username       => 'myusername',
   password       => 'mypassword',
   server_url     => 'https://xmlrpc.rhn.redhat.com/XMLRPC',
@@ -80,7 +80,7 @@ the puppetmaster to cause the custom types to be synced to its local libdir
 (`puppet master --configprint libdir`) and then restart the puppetmaster so it
 loads them.
 
-###Notes
+### Notes
 `username` and `password` are required to connect to the RHN, SATELLITE, SPACEWALK server to check if server previously exists.
 
 In a normal configuration username/password and activationkeys could not be used together, but since this module will support
