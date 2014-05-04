@@ -4,6 +4,7 @@ before_install:
   - gem install puppetlabs_spec_helper
   - gem install rspec
   - gem install puppet-lint
+  - gem install puppet-lint/tasks/puppet-lint
 
 notifications:
   email: false

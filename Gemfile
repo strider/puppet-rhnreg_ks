@@ -1,4 +1,3 @@
-#source :rubygems
 source 'https://rubygems.org'
 
 gem 'puppet', '>= 2.6.0'
