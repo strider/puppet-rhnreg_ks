@@ -36,7 +36,7 @@ The module adds the following new types:
 - **proxy_user**: Specify a username to use with an authenticated http proxy
 - **rhnsd**: Whether or not rhnsd should be started after registering. Default value is `true`.
 - **server_url**: Specify a url to use as a server (required)
-- **ssl_ca_cert**: Specify a file to use as the ssl CA cert (required)
+- **ssl_ca_cert**: Specify a file to use as the ssl CA cert
 - **username**: The username to use when registering the system (required)
 - **virtinfo**: Whether or not virtualiztion information should be uploaded. Default value is `true`.
 
