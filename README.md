@@ -81,7 +81,7 @@ the puppetmaster to cause the custom types to be synced to its local libdir
 loads them.
 
 ###Notes
-username` and `password` is required to connect to the RHN, SATELLITE, SPACEWALK server to check if server previously exists.
+`username` and `password` is required to connect to the RHN, SATELLITE, SPACEWALK server to check if server previously exists.
 
 In a normal configuration username/password and activationkeys could not be used together, but since this module will support
 RHN, SATELLITE, SPACEWALK register and un-register by being able to log into the system using the api it needs username/password.
