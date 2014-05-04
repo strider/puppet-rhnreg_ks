@@ -73,13 +73,13 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
         serverList = @client.call('system.listSystems', @key)
           serverList.each do |x|
             if x['name'] == "#{@MYSYSTEM}"
-	          return true
+	         return true
             else
                   next
             end
           end
-      Puppet.debug("Server #{@MYSYSTEM} not found")
-      return false
+          Puppet.debug("Server #{@MYSYSTEM} not found")
+          return false
   end
 
   def destroy_server(mysystem, mylogin, mypassword, myurl)
@@ -115,12 +115,6 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
              end
            end
          FileUtils.rm_f("#{@SFILE}")
-
-       if File.exists?("#{@SFILE}")
-         Puppet.debug("#{@MYSYSTEM} has not been unregistered")
-       else
-         Puppet.debug("#{@MYSYSTEM} is not registered")
-       end
   end
 
 
@@ -137,21 +131,29 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     @SFILE = '/etc/sysconfig/rhn/systemid'
       if File.exists?("#{@SFILE}") and File.open("#{@SFILE}").grep(/#{@resource[:name]}/).any? and File.open("#{@SFILE}").grep(/#{@resource[:profile_name]}/).any?
            if ! @resource[:profile_name].nil?
-              check_server(@resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url])
-                  Puppet.debug("Checking if the server #{@resource[:profile_name]} is already registered")
-               if @resource[:force] == true
-                   destroy
-                   return false
-               end
-             return true
+                 Puppet.debug("Checking if the server #{@resource[:profile_name]} is already registered")
+                 value = check_server(@resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url])
+                 if "#{value}" == 'true'
+                       if @resource[:force] == true
+                         destroy
+                         return false
+                       end
+                       return true
+                 else
+                       return false
+                 end
            else
-              check_server(@resource[:name], @resource[:username], @resource[:password], @resource[:server_url])
-                 Puppet.debug("Checking if the server #{@resource[:name]} is already registered")
-               if @resource[:force] == true
-                   destroy
-                   return false
-               end
-               return true
+                  Puppet.debug("Checking if the server #{@resource[:name]} is already registered")
+                 value = check_server(@resource[:name], @resource[:username], @resource[:password], @resource[:server_url])
+                 if "#{value}" == 'true'
+                       if @resource[:force] == true
+                          destroy
+                          return false
+                       end
+                       return true
+                 else
+                       return false
+                 end
             end
       else
           destroy
@@ -159,4 +161,3 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
       end
   end
 end
-
