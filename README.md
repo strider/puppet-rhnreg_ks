@@ -24,7 +24,7 @@ The module adds the following new types:
 
 ### Parameters
 
-- **activationkeys**: The activation key to use when registering the system (cannot be used with username and password)
+- **activationkeys**: The activation key to use when registering the system
 - **ensure**: Valid values are `present`, `absent`. Default value is `present`.
 - **force**: Should the registration be forced. Use this option with caution, setting it true will cause the rhnreg_ks command to be run every time runs. Default value `false`.
 - **hardware**: Whether or not the hardware information should be probed. Default value is `true`.
@@ -79,6 +79,14 @@ have to use it) and that the master has pluginsync enabled.  Run the agent on
 the puppetmaster to cause the custom types to be synced to its local libdir
 (`puppet master --configprint libdir`) and then restart the puppetmaster so it
 loads them.
+
+###Notes
+username` and `password` is required to connect to the RHN, SATELLITE, SPACEWALK server to check if server previously exists.
+
+In a normal configuration username/password and activationkeys could not be used together, but since this module will support
+RHN, SATELLITE, SPACEWALK register and un-register by being able to log into the system using the api it needs username/password.
+
+To see the output of what the module is doing, run with the --debug option.
 
 ## Issues
 
