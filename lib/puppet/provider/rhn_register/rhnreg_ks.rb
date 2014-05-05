@@ -1,3 +1,8 @@
+require 'xmlrpc/client'
+require 'net/https'
+require 'openssl'
+
+
 Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   @doc = <<-EOS
     This provider registers a machine with RHN or a Satellite Server.
@@ -7,13 +12,13 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
 
   confine :osfamily => :redhat
 
-  commands :rhnreg_ks => "rhnreg_ks"
+  commands :rhnreg_ks     => "rhnreg_ks"
 
   def build_parameters
     params = []
 
-    if @resource[:username].nil? and @resource[:activationkeys].nil?
-        self.fail("Either an activation key or username/password is required to register")
+    if @resource[:username].nil? and @resource[:activationkeys].nil? and @resource[:password].nil? and @resource[:server_url].nil?
+        self.fail(""Username/Password or Activationkey and ServerURL are required"")
     end
 
     params << "--profilename" << @resource[:profile_name] if ! @resource[:profile_name].nil?
@@ -44,25 +49,113 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   end
 
   def create
+    Puppet.debug("Server is not registered, Registering server now.")
     register
   end
+  
+  def check_server(mysystem, mylogin, mypassword, myurl)
 
-  def destroy
-    Puppet.debug("This server will be locally unregistered")
-    FileUtils.rm_f("/etc/sysconfig/rhn/systemid")
+    @MYSYSTEM = mysystem.to_s
+    @SATELLITE_LOGIN = mylogin.to_s
+    @SATELLITE_PASSWORD = mypassword.to_s
+    @SATELLITE_URL = URI(myurl.to_s)
+    @SATELLITE_URL.path = '/rpc/api'
+
+    @client = XMLRPC::Client.new2("#{@SATELLITE_URL}") 
+
+    #disable check of ssl cert
+    @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+     begin
+      @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+      rescue Exception => e
+       self.fail("Failed to contact the server #{@resource[:server_url]}")
+     end
+       serverList = @client.call('system.listSystems', @key)
+       serverList.each do |x|
+         if x['name'] == "#{@MYSYSTEM}"
+           return true
+         else
+           next
+         end
+       end
+      Puppet.debug("Server #{@MYSYSTEM} not found")
+      return false
   end
 
-  def exists?
-    Puppet.debug("Verifying if the server is already registered")
-    if File.exists?("/etc/sysconfig/rhn/systemid")
-      if @resource[:force] == true
-        register
+  def destroy_server(mysystem, mylogin, mypassword, myurl)
+    @MYSYSTEM = mysystem.to_s
+    @SATELLITE_LOGIN = mylogin.to_s
+    @SATELLITE_PASSWORD = mypassword.to_s
+    @SATELLITE_URL = URI(myurl.to_s)
+    @SATELLITE_URL.path = '/rpc/api'
+
+      def delete_server(myserver, myserverid)
+        Puppet.debug("This script has deleted server #{myserver} with id: #{myserverid} from #{@SATELLITE_URL.host}")
+        return_code = @client.call('system.deleteSystems', @key, myserverid)
       end
-      return true
+
+    @client = XMLRPC::Client.new2("#{@SATELLITE_URL}")
+
+    #disable check of ssl cert
+    @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    begin
+    @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+    rescue Exception => e
+      self.fail("Failed to contact the server #{@resource[:server_url]}")
+    end
+      serverList = @client.call('system.listSystems', @key)
+      serverList.each do |x|
+        if x['name'] == "#{@MYSYSTEM}"
+          Puppet.debug("Destroying server #{@MYSYSTEM} from #{@SATELLITE_URL}")
+          delete_server(x['name'], x['id'])
+        else
+          next
+        end
+      end
+    FileUtils.rm_f("#{@SFILE}")
+  end
+
+
+  def destroy
+    if ! @resource[:profile_name].nil?
+      destroy_server(@resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url])
     else
-      return false
+      destroy_server(@resource[:name], @resource[:username], @resource[:password], @resource[:server_url])
     end
   end
 
+  def exists?
+    @SFILE = '/etc/sysconfig/rhn/systemid'
+      if File.exists?("#{@SFILE}") and File.open("#{@SFILE}").grep(/#{@resource[:name]}/).any? and File.open("#{@SFILE}").grep(/#{@resource[:profile_name]}/).any?
+        if ! @resource[:profile_name].nil?
+          Puppet.debug("Checking if the server #{@resource[:profile_name]} is already registered")
+          value = check_server(@resource[:profile_name], @resource[:username], @resource[:password], @resource[:server_url])
+            if "#{value}" == 'true'
+              if @resource[:force] == true
+                destroy
+                return false
+              end
+                return true
+            else
+              return false
+            end
+        else
+          Puppet.debug("Checking if the server #{@resource[:name]} is already registered")
+          value = check_server(@resource[:name], @resource[:username], @resource[:password], @resource[:server_url])
+            if "#{value}" == 'true'
+              if @resource[:force] == true
+                destroy
+                return false
+              end
+                return true
+            else
+              return false
+            end
+        end
+      else
+        destroy
+        return false
+      end
+  end
 end
-
