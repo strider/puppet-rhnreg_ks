@@ -55,65 +55,65 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   
   def check_server(mysystem, mylogin, mypassword, myurl)
 
-  @MYSYSTEM = mysystem.to_s
-  @SATELLITE_LOGIN = mylogin.to_s
-  @SATELLITE_PASSWORD = mypassword.to_s
-  @SATELLITE_URL = URI(myurl.to_s)
-  @SATELLITE_URL.path = '/rpc/api'
+    @MYSYSTEM = mysystem.to_s
+    @SATELLITE_LOGIN = mylogin.to_s
+    @SATELLITE_PASSWORD = mypassword.to_s
+    @SATELLITE_URL = URI(myurl.to_s)
+    @SATELLITE_URL.path = '/rpc/api'
 
-  @client = XMLRPC::Client.new2("#{@SATELLITE_URL}") 
+    @client = XMLRPC::Client.new2("#{@SATELLITE_URL}") 
 
-  #disable check of ssl cert
-  @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
-   begin
-    @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
-     rescue Exception => e
-     self.fail("Failed to contact the server #{@resource[:server_url]}")
-   end
-     serverList = @client.call('system.listSystems', @key)
-     serverList.each do |x|
-       if x['name'] == "#{@MYSYSTEM}"
-         return true
-       else
-         next
-       end
+    #disable check of ssl cert
+    @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+     begin
+      @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+      rescue Exception => e
+       self.fail("Failed to contact the server #{@resource[:server_url]}")
      end
-    Puppet.debug("Server #{@MYSYSTEM} not found")
-    return false
+       serverList = @client.call('system.listSystems', @key)
+       serverList.each do |x|
+         if x['name'] == "#{@MYSYSTEM}"
+           return true
+         else
+           next
+         end
+       end
+      Puppet.debug("Server #{@MYSYSTEM} not found")
+      return false
   end
 
   def destroy_server(mysystem, mylogin, mypassword, myurl)
-  @MYSYSTEM = mysystem.to_s
-  @SATELLITE_LOGIN = mylogin.to_s
-  @SATELLITE_PASSWORD = mypassword.to_s
-  @SATELLITE_URL = URI(myurl.to_s)
-  @SATELLITE_URL.path = '/rpc/api'
+    @MYSYSTEM = mysystem.to_s
+    @SATELLITE_LOGIN = mylogin.to_s
+    @SATELLITE_PASSWORD = mypassword.to_s
+    @SATELLITE_URL = URI(myurl.to_s)
+    @SATELLITE_URL.path = '/rpc/api'
 
-    def delete_server(myserver, myserverid)
-      Puppet.debug("This script has deleted server #{myserver} with id: #{myserverid} from #{@SATELLITE_URL.host}")
-      return_code = @client.call('system.deleteSystems', @key, myserverid)
-    end
-
-  @client = XMLRPC::Client.new2("#{@SATELLITE_URL}")
-
-  #disable check of ssl cert
-  @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-  begin
-  @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
-  rescue Exception => e
-    self.fail("Failed to contact the server #{@resource[:server_url]}")
-  end
-    serverList = @client.call('system.listSystems', @key)
-    serverList.each do |x|
-      if x['name'] == "#{@MYSYSTEM}"
-        Puppet.debug("Destroying server #{@MYSYSTEM} from #{@SATELLITE_URL}")
-        delete_server(x['name'], x['id'])
-      else
-        next
+      def delete_server(myserver, myserverid)
+        Puppet.debug("This script has deleted server #{myserver} with id: #{myserverid} from #{@SATELLITE_URL.host}")
+        return_code = @client.call('system.deleteSystems', @key, myserverid)
       end
+
+    @client = XMLRPC::Client.new2("#{@SATELLITE_URL}")
+
+    #disable check of ssl cert
+    @client.instance_variable_get(:@http).verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    begin
+    @key = @client.call('auth.login', @SATELLITE_LOGIN, @SATELLITE_PASSWORD)
+    rescue Exception => e
+      self.fail("Failed to contact the server #{@resource[:server_url]}")
     end
-  FileUtils.rm_f("#{@SFILE}")
+      serverList = @client.call('system.listSystems', @key)
+      serverList.each do |x|
+        if x['name'] == "#{@MYSYSTEM}"
+          Puppet.debug("Destroying server #{@MYSYSTEM} from #{@SATELLITE_URL}")
+          delete_server(x['name'], x['id'])
+        else
+          next
+        end
+      end
+    FileUtils.rm_f("#{@SFILE}")
   end
 
 
