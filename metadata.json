@@ -1,6 +1,6 @@
 {
   "name": "strider-rhnreg_ks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "source": "git://github.com/strider/puppet-rhnreg_ks.git",
   "author": "Gael Chamoulaud <gchamoul@redhat.com>",
   "license": "Apache License, Version 2.0",
