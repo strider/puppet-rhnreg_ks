@@ -1,7 +1,8 @@
 # PUPPET-RHNREG_KS
 
-This module provides Custom Puppet Provider to handle Red Hat Network
-Registering. It works with `RHN` or a `Red Hat Network Satellite` Server.
+This module provides Custom Puppet Providers to handle Red Hat Network
+Registering and subscribing to additional channels.
+It works with `RHN` or a `Red Hat Network Satellite` Server.
 
 ## License
 
@@ -13,13 +14,16 @@ Read Licence file for more information.
 ## Authors
 * Gaël Chamoulaud (gchamoul at redhat dot com)
 
-## Type and Provider
+## Types and Providers
 
 The module adds the following new types:
 
 * `rhn_register` for managing Red Hat Network Registering
+* `rhn_channel` for adding/removing channels
 
 ### Parameters
+
+#### rhn_register
 
 - **activationkeys**: The activation key to use when registering the system (cannot be used with username and password)
 - **ensure**: Valid values are `present`, `absent`. Default value is `present`.
@@ -36,6 +40,13 @@ The module adds the following new types:
 - **ssl_ca_cert**: Specify a file to use as the ssl CA cert
 - **username**: The username to use when registering the system
 - **virtinfo**: Whether or not virtualiztion information should be uploaded. Default value is `true`.
+
+#### rhn_channel
+
+- **channel** The channel to manage. (This is the namevar).
+- **ensure** Valid values are `present`, `absent`.
+- **username** The username to use when adding/removing a channel.
+- **password** The password to use when adding/removing a channel.
 
 ### Example
 
@@ -59,6 +70,16 @@ rhn_register { 'server.example.com':
   server_url     => 'https://xmlrpc.rhn.redhat.com/XMLRPC',
   ssl_ca_cert    => '/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT',
   force          => true,
+}
+</pre>
+
+Adding a Channel:
+
+<pre>
+rhn_channel { 'centos6-scl-x86_64':
+  ensure   => present,
+  username => 'myusername',
+  password => 'mypassword',
 }
 </pre>
 
