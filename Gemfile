@@ -1,15 +1,27 @@
-source :rubygems
+source 'https://rubygems.org'
 
-gem 'puppet', '>= 2.6.0'
-gem 'facter', '>= 1.6.1'
+group :development, :test do
+  gem 'puppetlabs_spec_helper', :require => false
+  gem 'rspec-puppet', '~> 2.0.0', :require => false
 
-group :test, :development do
-  gem 'rspec', '>= 2.13.0'
-  gem 'mocha', '>= 0.13.2'
-  gem 'puppetlabs_spec_helper', '>= 0.4.1' 
-  gem 'rspec-puppet', '>= 0.1.5'
+  gem 'metadata-json-lint'
+  gem 'puppet-lint-param-docs'
+  gem 'puppet-lint-absolute_classname-check'
+  gem 'puppet-lint-absolute_template_path'
+  gem 'puppet-lint-trailing_newline-check'
+
+  # Puppet 4.x related lint checks
+  gem 'puppet-lint-unquoted_string-check'
+  gem 'puppet-lint-leading_zero-check'
+  gem 'puppet-lint-variable_contains_upcase'
+  gem 'puppet-lint-numericvariable'
+
+  gem 'json'
+  gem 'webmock'
 end
 
-if File.exists? "#{__FILE__}.local"
-  eval(File.read("#{__FILE__}.local"), binding)
+if puppetversion = ENV['PUPPET_GEM_VERSION']
+  gem 'puppet', puppetversion, :require => false
+else
+  gem 'puppet', :require => false
 end
