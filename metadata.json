@@ -3,94 +3,17 @@
   "version": "0.1.2",
   "source": "git://github.com/strider/puppet-rhnreg_ks.git",
   "author": "Gael Chamoulaud <gchamoul@redhat.com>",
-  "license": "Apache License, Version 2.0",
+  "license": "Apache-2.0",
   "summary": "rhnreg_ks provider for Puppet",
   "description": "This module provides Custom Providers for Red Hat Network Registering.",
   "project_page": "https://github.com/strider/puppet-rhnreg_ks",
+  "operatingsystem_support": [
+    {
+    "operatingsystem":"RedHat",
+    "operatingsystemrelease":[ "5.0", "6.0", "7.0" ]
+    }
+  ],
   "dependencies": [
-    {
-      "name": "adrien/boolean",
-      "version_requirement": ">=0.9.0"
-    }
-  ],
-  "types": [
-    {
-      "name": "rhn_register",
-      "doc": "",
-      "properties": [
-        {
-          "name": "ensure",
-          "doc": "\n\nValid values are `present`, `absent`. "
-        }
-      ],
-      "parameters": [
-        {
-          "name": "name",
-          "doc": "The Server name.\n\n"
-        },
-        {
-          "name": "profile_name",
-          "doc": "The name the system should use in RHN or Satellite\n\n"
-        },
-        {
-          "name": "username",
-          "doc": "The username to use when registering the system\n\n"
-        },
-        {
-          "name": "password",
-          "doc": "The password to use when registering the system\n\n"
-        },
-        {
-          "name": "activationkeys",
-          "doc": "The activation key to use when registering the system (cannot be used with username and password)\n\n"
-        },
-        {
-          "name": "hardware",
-          "doc": "Whether or not the hardware information should be probed\n\n"
-        },
-        {
-          "name": "packages",
-          "doc": "Whether or not packages information should be probed\n\n"
-        },
-        {
-          "name": "virtinfo",
-          "doc": "Whether or not virtualiztion information should be uploaded\n\n"
-        },
-        {
-          "name": "rhnsd",
-          "doc": "Whether or not rhnsd should be started after registering\n\n"
-        },
-        {
-          "name": "force",
-          "doc": "Should the registration be forced. Use this option with caution,\nsetting it true will cause the rhnreg_ks command to be run every time\nruns.\n\n"
-        },
-        {
-          "name": "proxy",
-          "doc": "If needed, specify the HTTP Proxy\n\n"
-        },
-        {
-          "name": "proxy_user",
-          "doc": "Specify a username to use with an authenticated http proxy\n\n"
-        },
-        {
-          "name": "proxy_password",
-          "doc": "Specify a password to use with an authenticated http proxy\n\n"
-        },
-        {
-          "name": "ssl_ca_cert",
-          "doc": "Specify a file to use as the ssl CA cert\n\n"
-        },
-        {
-          "name": "server_url",
-          "doc": "Specify a url to use as a server\n\n"
-        }
-      ],
-      "providers": [
-        {
-          "name": "rhnreg_ks",
-          "doc": "This provider registers a machine with RHN or a Satellite Server.\nIf a machine is already registered it does nothing unless the force\nparameter is set to true.\n\n* Required binaries: `rhnreg_ks`."
-        }
-      ]
-    }
-  ],
+    { "name": "adrien/boolean", "version_requirement": ">=0.9.0" }
+  ]
 }
