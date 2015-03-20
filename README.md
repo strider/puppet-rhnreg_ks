@@ -28,6 +28,7 @@ The module adds the following new types:
 - **activationkeys**: The activation key to use when registering the system (cannot be used with username and password)
 - **ensure**: Valid values are `present`, `absent`. Default value is `present`.
 - **force**: Should the registration be forced. Use this option with caution, setting it true will cause the rhnreg_ks command to be run every time runs. Default value `false`.
+- **force_check**: Should the registration be forced if the server_url on the current system has a mismatch with the one defined during the puppet run. Default value `false`.
 - **hardware**: Whether or not the hardware information should be probed. Default value is `true`.
 - **packages**: Whether or not packages information should be probed. Default value is `true`.
 - **password**: The password to use when registering the system
