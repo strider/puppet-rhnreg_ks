@@ -43,7 +43,7 @@ Puppet::Type.newtype(:rhn_register) do
 
   newparam(:username) do
     desc "The username to use when registering the system"
-    
+
   end
 
   newparam(:password) do
@@ -88,6 +88,13 @@ Puppet::Type.newtype(:rhn_register) do
           runs."
 
     defaultto false
+  end
+
+  newparam(:force_check, :parent => Puppet::Property::Boolean) do
+  desc "Should the registration be forced if the server_url the system is
+        currently registered to differs from the one provided."
+
+   defaultto false
   end
 
   newparam(:proxy) do
