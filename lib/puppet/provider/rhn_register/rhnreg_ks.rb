@@ -29,7 +29,7 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     params << "--proxyPassword" << @resource[:proxy_password] if ! @resource[:proxy_password].nil?
     params << "--sslCACert" <<  @resource[:ssl_ca_cert] if ! @resource[:ssl_ca_cert].nil?
     params << "--serverUrl" << @resource[:server_url] if ! @resource[:server_url].nil?
-    params << "--force" if @resource[:force]
+    params << "--force" if @resource[:force] or (@resource[:force_check] and !server_expected())
 
     params.each do |pm|
       Puppet.debug("#{pm}")
@@ -52,11 +52,25 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
     FileUtils.rm_f("/etc/sysconfig/rhn/systemid")
   end
 
+  def server_expected
+    f = File.open("/etc/sysconfig/rhn/up2date")
+    while line = f.gets()
+      return true if (line =~ /serverURL.*=.*#{@resource[:server_url]}.*/i)
+    end
+    return false
+  end
+
   def exists?
     Puppet.debug("Verifying if the server is already registered")
     if File.exists?("/etc/sysconfig/rhn/systemid")
       if @resource[:force] == true
         register
+      end
+      if @resource[:force_check] == true
+        if !server_expected()
+          Puppet.debug("This server will be re-registered: server_url mismatch!")
+          register
+        end
       end
       return true
     else
@@ -65,4 +79,3 @@ Puppet::Type.type(:rhn_register).provide(:rhnreg_ks) do
   end
 
 end
-
