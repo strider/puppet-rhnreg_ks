@@ -1,5 +1,5 @@
 # rhn_system_id.rb
-require 'nokogiri'
+require 'rexml/document'
 
 Facter.add(:rhn_system_id) do
   confine :osfamily => 'RedHat'
@@ -11,9 +11,9 @@ Facter.add(:rhn_system_id) do
     if FileTest.file?(filepath)
       begin
         f = File.open(filepath)
-        doc = Nokogiri::XML(f)
+        doc = REXML::Document.new f
         f.close
-        value = doc.xpath("/params/param/value/struct/member[name='system_id']/value/string")[0].content
+        value = REXML::XPath.match( doc, "/params/param/value/struct/member[name='system_id']/value/string")[0].text
       rescue
         value = nil
       end
