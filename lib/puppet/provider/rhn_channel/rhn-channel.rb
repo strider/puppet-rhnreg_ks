@@ -4,7 +4,12 @@ Puppet::Type.type(:rhn_channel).provide(:rhn_channel) do
   commands :rhn_channel => 'rhn-channel'
 
   def self.instances
-    channels = rhn_channel('--list')
+    begin
+      channels = rhn_channel('--list')
+    rescue Puppet::ExecutionFailure => e
+      Puppet.debug "#rhn_channel --list had an error -> #{e.inspect}"
+      return {}
+    end
     channels.split("\n").collect do |line|
       new(:name   => line,
           :ensure => :present
