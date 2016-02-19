@@ -8,7 +8,7 @@ describe Puppet::Type.type(:rhn_channel) do
   end
 
   it 'should accept a channel name' do
-    @channel[:channel].should == 'foo'
+    expect(@channel[:channel]).to eq('foo')
   end
 
   it 'should require a username when adding channel' do
