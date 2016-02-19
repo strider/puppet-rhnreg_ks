@@ -13,6 +13,36 @@ Read Licence file for more information.
 
 ## Authors
 * Gaël Chamoulaud (gchamoul at redhat dot com)
+* Corey Osman <corey@nwops.io>
+
+## Functions
+Note: the usage of this function requires the future parser or puppet 4
+
+rhn_keys - Allows you to build a complex list of rhn registration keys easily
+using facts and a key_map.  Returns a comma separated string of registration keys.
+
+```puppet
+# fact values that point to a registration key
+$rhn_registration_keys_map = {
+   'rhel6'    => '12393828293',
+   'physical' => '128283828',
+   'vmware'   => '3882838223',
+   'rhel7'    => '1383823923',
+   'location_1' => '23232323232'
+ }
+ # these should be fact names
+$rhn_registration_criteria = ['virtual', 'operatingsystemrelease', 'location']
+
+$reg_keys = rhn_keys($rhn_registration_keys_map, $rhn_registration_criteria, $::facts)
+
+rhn_register { $satellite_server:
+  activationkeys => $reg_keys,
+  server_url     => "https://${satellite_server}/XMLRPC",
+  ssl_ca_cert    => $rhn_server_cert_path,
+  force          => false,
+}
+
+```
 
 ## Types and Providers
 
